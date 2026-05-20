@@ -1,0 +1,8 @@
+title: My Jekyll Blog
+description: GitHub Actions powered blog
+theme: minima
+
+plugins:
+  - jekyll-feed
+
+markdown: kramdown
