@@ -3,118 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ブログ記事タイトル | My Blog</title>
-  <meta name="description" content="この記事は、ブログ記事のHTML構成例です。" />
+  <title>My Blog</title>
   <link rel="stylesheet" href="main.css" />
 </head>
+
 <body>
   <header class="site-header">
     <h1 class="site-title">My Blog</h1>
-    <p class="site-description">技術メモと日々の記録を置く場所</p>
+    <p class="site-description">連番で増えるだけのブログ</p>
   </header>
 
   <main class="main">
-    <article class="article">
+    <section class="article">
       <header class="article-header">
-        <h1 class="article-title">ブログ記事タイトルのサンプル</h1>
-
-        <div class="article-meta">
-          <span>2026-05-20</span>
-          <span>読み時間: 5分</span>
-          <span>カテゴリ: <a href="#">Web制作</a></span>
-        </div>
+        <h2 class="article-title">記事一覧</h2>
       </header>
 
       <div class="article-content">
-        <p>
-          これは <code>main.css</code> を使ったブログ記事のHTML例です。
-          見出し、段落、コード、引用、表、ボタンまで一通り入れています。
-        </p>
-
-        <h2>見出しの例</h2>
-        <p>
-          記事本文はこのように普通に書けます。
-          CSS側で余白や文字サイズが整うようにしてあるので、特別な装飾は少なくて大丈夫です。
-        </p>
-
-        <h3>箇条書きの例</h3>
-        <ul>
-          <li>読みやすい段落</li>
-          <li>適度な余白</li>
-          <li>コードブロック対応</li>
-        </ul>
-
-        <h3>引用の例</h3>
-        <blockquote>
-          <p>
-            文章は見た目より構造が大事です。見た目はあとからいくらでも整えられます。
-          </p>
-        </blockquote>
-
-        <h3>コードの例</h3>
-        <p>インラインコードは <code>console.log("hello");</code> のように使えます。</p>
-
-        <pre><code>function greet(name) {
-  return `こんにちは、${name}さん`;
-}
-
-console.log(greet("Qianyu"));</code></pre>
-
-        <h2>画像の例</h2>
-        <figure>
-          <img src="https://via.placeholder.com/1200x675" alt="記事内のサンプル画像" />
-          <figcaption>これはサンプル画像です。</figcaption>
-        </figure>
-
-        <h2>表の例</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>項目</th>
-              <th>内容</th>
-              <th>備考</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>CSS</td>
-              <td>main.css</td>
-              <td>共通デザイン</td>
-            </tr>
-            <tr>
-              <td>HTML</td>
-              <td>article-template.html</td>
-              <td>記事ページ本体</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <hr />
-
-        <h2>タグ</h2>
-        <ul class="tag-list">
-          <li><a href="#">HTML</a></li>
-          <li><a href="#">CSS</a></li>
-          <li><a href="#">ブログ</a></li>
-        </ul>
-
-        <h2>カテゴリ</h2>
-        <ul class="category-list">
-          <li><a href="#">Web制作</a></li>
-          <li><a href="#">フロントエンド</a></li>
-          <li><a href="#">メモ</a></li>
-        </ul>
-
-        <p>
-          <a class="button" href="#">続きを読む</a>
-          <a class="read-more" href="#">関連記事を見る →</a>
-        </p>
+        <ul id="postList" class="tag-list"></ul>
       </div>
-    </article>
+    </section>
   </main>
 
   <footer class="site-footer">
-    <p>&copy; 2026 My Blog. All rights reserved.</p>
+    <p>&copy; 2026 My Blog</p>
   </footer>
+
+  <script>
+    const list = document.getElementById("postList");
+
+    async function checkPost(id) {
+      const path = `posts/${id}/index.html`;
+
+      try {
+        const res = await fetch(path, { method: "HEAD" });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    async function loadPosts() {
+      let i = 1;
+      const max = 999; // 夢の上限（現実逃避）
+
+      while (i <= max) {
+        const id = String(i).padStart(3, "0");
+
+        const exists = await checkPost(id);
+
+        if (!exists) {
+          // 連番途切れたら終了（雑な世界）
+          i++;
+          continue;
+        }
+
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+
+        a.href = `posts/${id}/index.html`;
+        a.textContent = `Post ${id}`;
+
+        li.appendChild(a);
+        list.appendChild(li);
+
+        i++;
+      }
+
+      if (list.children.length === 0) {
+        list.innerHTML = "<li>まだ記事が存在しない</li>";
+      }
+    }
+
+    loadPosts();
+  </script>
 </body>
 </html>
