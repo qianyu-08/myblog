@@ -1,8 +1,10 @@
 title: My Jekyll Blog
-description: GitHub Actions powered blog
+description: GitHub Pages blog
+
+baseurl: "/myblog"
+url: "https://qianyu-08.github.io"
+
 theme: minima
 
 plugins:
   - jekyll-feed
-
-markdown: kramdown
