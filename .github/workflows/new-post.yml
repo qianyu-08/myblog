@@ -1,0 +1,80 @@
+name: Create New Post (Interactive-ish)
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "記事タイトル"
+        required: true
+        default: "new-post"
+
+      content:
+        description: "記事本文（Markdown or HTML）"
+        required: true
+        default: "ここに記事を書く"
+
+jobs:
+  create-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Generate next post number
+        id: gen
+        run: |
+          mkdir -p posts
+
+          LAST=$(ls posts 2>/dev/null | grep -E '^[0-9]+' | sort -n | tail -1)
+
+          if [ -z "$LAST" ]; then
+            NEXT=1
+          else
+            NEXT=$((10#$LAST + 1))
+          fi
+
+          NEXT_PADDED=$(printf "%03d" $NEXT)
+
+          echo "next=$NEXT_PADDED" >> $GITHUB_OUTPUT
+
+      - name: Create post folder + file
+        run: |
+          FOLDER="posts/${{ steps.gen.outputs.next }}"
+          mkdir -p "$FOLDER"
+
+          cat <<EOF > "$FOLDER/index.html"
+          <!DOCTYPE html>
+          <html lang="ja">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>${{ github.event.inputs.title }}</title>
+            <link rel="stylesheet" href="../../main.css" />
+          </head>
+          <body>
+
+            <header class="site-header">
+              <h1 class="site-title">${{ github.event.inputs.title }}</h1>
+            </header>
+
+            <main class="main">
+              <article class="article">
+                <div class="article-content">
+                  ${{ github.event.inputs.content }}
+                </div>
+              </article>
+            </main>
+
+          </body>
+          </html>
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add posts/
+          git commit -m "Add post ${{ steps.gen.outputs.next }}" || echo "No changes"
+          git push
